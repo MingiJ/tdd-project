@@ -1,29 +1,41 @@
-const Money = require('./money')
+const Money = require("./money");
 
-class Portfolio{
-    constructor(){
-        this.moneys = [];
+class Portfolio {
+  constructor() {
+    this.moneys = [];
+  }
+  add(...moneys) {
+    this.moneys = this.moneys.concat(moneys);
+  }
+  convert(money, currency) {
+    let exchangeRates = new Map();
+    exchangeRates.set("EUR->USD", 1.2);
+    exchangeRates.set("USD->KRW", 1100);
+    if (money.currency === currency) {
+      return money.amount;
     }
-    add(...moneys){
-        this.moneys = this.moneys.concat(moneys);
+    let key = money.currency + "->" + currency;
+    let rate = exchangeRates.get(key);
+    if (rate === undefined) {
+      return undefined;
     }
-    convert(money, currency){
-        let exchangeRates = new Map();
-        exchangeRates.set("EUR->USD", 1.2);
-        exchangeRates.set("USD->KRW", 1100);
-        if(money.currency === currency){
-            return money.amount;
-        }
-        let key = money.currency + "->" + currency;
-        return money.amount * exchangeRates.get(key);
-
+    return money.amount * rate;
+  }
+  evaluate(currency) {
+    let failures = [];
+    let total = this.moneys.reduce((sum, money) => {
+      let convertedAmount = this.convert(money, currency);
+      if (convertedAmount === undefined) {
+        failures.push(money.currency + "->" + currency);
+        return sum;
+      }
+      return sum + convertedAmount;
+    }, 0);
+    if (!failures.length) {
+      return new Money(total, currency);
     }
-    evaluate(currency){
-        let total = this.moneys.reduce((sum, money) =>{
-            return sum + this.convert(money, currency);
-        },0);
-        return new Money(total, currency);
-    }
+    throw new Error("Missing exchange rate(s):["+ failures.join() + "]");
+  }
 }
 
 module.exports = Portfolio;

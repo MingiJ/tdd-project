@@ -25,45 +25,56 @@ class MoneyTest {
     portfolio.add(fiveDollars, tenDollars);
     assert.deepStrictEqual(portfolio.evaluate("USD"), fifteenDolllars);
   }
-  testAdditionOfDollarsAndEuros(){
-      let fiveDollars = new Money(5, "USD");
-      let tenEuros = new Money(10, "EUR");
-      let portfolio = new Portfolio();
-      portfolio.add(fiveDollars,tenEuros);
-      let expectedValue = new Money(17, "USD");
-      assert.deepStrictEqual(portfolio.evaluate("USD"), expectedValue);
+  testAdditionOfDollarsAndEuros() {
+    let fiveDollars = new Money(5, "USD");
+    let tenEuros = new Money(10, "EUR");
+    let portfolio = new Portfolio();
+    portfolio.add(fiveDollars, tenEuros);
+    let expectedValue = new Money(17, "USD");
+    assert.deepStrictEqual(portfolio.evaluate("USD"), expectedValue);
   }
-  testAdditionOfDollarsAndWons(){
+  testAdditionWithMultipleExchangeRates() {
+    let oneDollar = new Money(1, "USD");
+    let oneEuro = new Money(1, "EUR");
+    let oneWon = new Money(1, "KRW");
+    let portfolio = new Portfolio();
+    portfolio.add(oneDollar, oneEuro, oneWon);
+    let expectedError = new Error(
+        "Missing exchange rate(s):[USD->Kalganid, EUR->Kalgaind, KRW->Kalganid]"
+    );
+    assert.throws(()=>{portfolio.evaluate("Kalganid")}, expectedError);
+  }
+  testAdditionOfDollarsAndWons() {
     let oneDollar = new Money(1, "USD");
     let elevenHundrenWon = new Money(1100, "KRW");
     let portfolio = new Portfolio();
-    portfolio.add(oneDollar,elevenHundrenWon);
+    portfolio.add(oneDollar, elevenHundrenWon);
     let expectedValue = new Money(2200, "KRW");
     assert.deepStrictEqual(portfolio.evaluate("KRW"), expectedValue);
-}
-  runAllTests(){
-      let testMethods = this.getAllTestMethods();
-      testMethods.forEach(m =>{
-          console.log("Running %s()", m);
-          let method = Reflect.get(this,m);
-          try{
-              Reflect.apply(method,this,[]);
-          }catch(e){
-              if(e instanceof assert.AssertionError){
-                  console.log(e);
-              }else{
-                  throw e;
-              }
-          }
-      })
   }
-  getAllTestMethods(){
-      let moneyPrototype = MoneyTest.prototype;
-      let allProps = Object.getOwnPropertyNames(moneyPrototype);
-      let testMethods = allProps.filter(p=>{
-          return typeof moneyPrototype[p] === 'function' && p.startsWith("test");
-      });
-      return testMethods;
+  runAllTests() {
+    let testMethods = this.getAllTestMethods();
+    testMethods.forEach((m) => {
+      console.log("Running %s()", m);
+      let method = Reflect.get(this, m);
+      try {
+        Reflect.apply(method, this, []);
+      } catch (e) {
+        if (e instanceof assert.AssertionError) {
+          console.log(e);
+        } else {
+          throw e;
+        }
+      }
+    });
+  }
+  getAllTestMethods() {
+    let moneyPrototype = MoneyTest.prototype;
+    let allProps = Object.getOwnPropertyNames(moneyPrototype);
+    let testMethods = allProps.filter((p) => {
+      return typeof moneyPrototype[p] === "function" && p.startsWith("test");
+    });
+    return testMethods;
   }
 }
 
