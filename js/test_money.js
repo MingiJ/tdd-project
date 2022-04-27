@@ -9,6 +9,7 @@ class MoneyTest {
     this.bank.addExchangeRate("EUR", "USD", 1.2);
     this.bank.addExchangeRate("USD", "KRW", 1100);
   }
+  
   testMultiplication() {
     let tenEuros = new Money(10, "EUR");
     let twentyEuros = new Money(20, "EUR");
@@ -40,11 +41,11 @@ class MoneyTest {
     let expectedValue = new Money(17, "USD");
     assert.deepStrictEqual(portfolio.evaluate(this.bank,"USD"), expectedValue);
   }
-  testConversion() {
-    let bank = this.bank;
-    bank.addExchangeRate("EUR", "USD", 1.2);
+  testConversionWithDifferentRatesBetweenTwoCurrencies() {
     let tenEuros = new Money(10, "EUR");
-    assert.deepStrictEqual(bank.convert(tenEuros, "USD"), new Money(12, "USD"));
+    assert.deepStrictEqual(this.bank.convert(tenEuros, "USD"), new Money(12, "USD"));
+    this.bank.addExchangeRate("EUR", "USD", 1.3);
+    assert.deepStrictEqual(this.bank.convert(tenEuros, "USD"), new Money(13, "USD"));   
   }
 
   testConversionWithMissingExchangeRate(){
